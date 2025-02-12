@@ -23,9 +23,6 @@ st.set_page_config(page_title="Infobot", layout="wide")
 if "dark_mode" not in st.session_state:
     st.session_state.dark_mode = True  
 
-# Theme Toggle Button
-st.session_state.dark_mode = st.toggle("", value=st.session_state.dark_mode)
-
 # Define background gradients
 if st.session_state.dark_mode:
     gradient_bg = "linear-gradient(135deg, #141E30, #243B55)"  # Dark Mode
@@ -71,10 +68,31 @@ st.markdown(f"""
             padding: 10px;
             border-radius: 10px;
         }}
+
+        /* Style to position title beside toggle, increase font size and add space */
+        .stApp > header {{
+            # display: flex;
+            align-items: center;
+            justify-content: space-between; /* Distribute space between items */
+            padding: 20px 30px;  /* Add padding */
+        }}
+
+        .stApp > header > h1 {{
+            font-size: 5em; /* Increase title font size */
+            margin: 0; /* Remove default margin */
+        }}
+
     </style>
 """, unsafe_allow_html=True)
 
-st.header("Infobot AI Chat")
+# Header - placed here to ensure styling applies
+col1, col2 = st.columns([0.9, 0.1])  # 90% for the content, 10% for the toggle
+
+with col1:
+    st.header("Infobot AI Chat")
+
+with col2:
+    st.session_state.dark_mode = st.toggle("", value=st.session_state.dark_mode, key="theme_toggle")  # Use key to differentiate
 
 # Initialize chat history
 if "chat_history" not in st.session_state:
@@ -93,23 +111,15 @@ with col1:
 with col2:
     show_history = st.button("Chat History", use_container_width=True)
 
-# File Upload
-with col3:
-    uploaded_file = st.file_uploader("📂 Upload File", label_visibility="collapsed")
-
-    if uploaded_file:
-        file_name = uploaded_file.name
-        file_size = uploaded_file.size
-        st.success(f"📄 Uploaded: {file_name} ({file_size} bytes)")
-
 # Expand Chat History if Requested
-if show_history:
-    with st.expander("📖 Chat History", expanded=True):
-        for role, text in st.session_state["chat_history"]:
-            with st.chat_message("user" if role == "You" else "assistant"):
-                st.write(text)
+with col2:
+    if show_history:
+        with st.expander("📖 Chat History", expanded=True):
+            for role, text in st.session_state["chat_history"]:
+                with st.chat_message("user" if role == "You" else "assistant"):
+                    st.write(text)
 
-# Chat input (Placed at Bottom)
+# Chat input (Placed at the bottom)
 user_input = st.chat_input("Ask a question...")
 
 if user_input:
@@ -126,56 +136,3 @@ if user_input:
         st.write(response_text)
 
     st.session_state["chat_history"].append(("Bot", response_text))
-
-    # import streamlit as st
-# import os
-# import google.generativeai as genai
-
-# # Set API Key securely
-# os.environ['GEMINI_API_KEY'] = 'AIzaSyDhNBPxFPvwArIBlNc1hk0s8JKYmo6-yek'  # Don't hardcode in production!
-
-# genai.configure(api_key=os.environ['GEMINI_API_KEY'])
-
-# # Load the Gemini model
-# model = genai.GenerativeModel("gemini-1.5-flash")
-
-# # Start chat session
-# chat = model.start_chat()
-
-# def get_gemini_response(question):
-#     response = chat.send_message(question, stream=True)
-#     return response
-
-# # Initialize Streamlit app
-# st.set_page_config(page_title="Q&A Chat with Google Gemini")
-# st.header("Google Gemini AI Chatbot")
-
-# # Initialize chat history in session state
-# if 'chat_history' not in st.session_state:
-#     st.session_state['chat_history'] = []
-
-# # User input
-# user_input = st.text_input("Ask a question:")
-
-# # Button to submit question
-# if st.button("Submit") and user_input:
-#     response = get_gemini_response(user_input)
-
-#     # Store user input in history
-#     st.session_state['chat_history'].append(("You", user_input))
-
-#     st.subheader("Response:")
-#     full_response = ""
-    
-#     for chunk in response:
-#         st.write(chunk.text)
-#         full_response += chunk.text + " "
-
-#     # Store bot response in history
-#     st.session_state['chat_history'].append(("Bot", full_response))
-
-# # Display chat history
-# st.subheader("Chat History:")
-# for role, text in st.session_state['chat_history']:
-#     st.write(f"**{role}:** {text}")
-# Store user input in history
